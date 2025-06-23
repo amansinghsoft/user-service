@@ -6,6 +6,7 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.operation.user.exception.UserException;
 import com.operation.user.model.User;
 import com.operation.user.repository.UserRepository;
 
@@ -14,11 +15,11 @@ public class UserService {
 
 	@Autowired
 	private UserRepository repository;
-	
+
 	public User createUser(User user) {
-		
+
 		user.setPassword(generateRandomPassword());
-		
+
 		return repository.save(user);
 	}
 
@@ -27,7 +28,7 @@ public class UserService {
 		int min = 10000000; // Smallest 8-digit number
 		int max = 99999999; // Largest 8-digit number
 		int password = random.nextInt(max - min + 1) + min;
-		return  String.valueOf(password);
+		return String.valueOf(password);
 	}
 
 	public List<User> findAllUser() {
@@ -37,7 +38,9 @@ public class UserService {
 
 	public User getUserById(long id) {
 		// TODO Auto-generated method stub
-		return repository.findById(id).orElse(new User());
+		User var = repository.findById(id).get();
+
+		return var;
 	}
 
 	public User modifyUser(User user) {
@@ -47,9 +50,14 @@ public class UserService {
 
 	public String dropUserById(long id) {
 		// TODO Auto-generated method stub
-		User var = repository.findById(id).orElse(new User());
+		User var = null;
+		try {
+			var = repository.findById(id).get();
+		} catch (Exception e) {
+			throw new UserException("User is not available to drop : " + id);
+		}
 		repository.delete(var);
 		return "Entity Drop Sucessfull";
 	}
-	
+
 }
